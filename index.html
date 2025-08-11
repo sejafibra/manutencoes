@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Manutenções - Seja Fibra</title>
+    <!-- Favicon -->
+    <link rel="icon" href="https://raw.githubusercontent.com/fabricioubatuba/manutencoes/refs/heads/main/faviconsf.ico" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background-color: #f8f9fa; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .card-header { background-color: #0d6efd; color: white; font-weight: bold; }
+        .table-responsive { margin-top: 20px; }
+        .btn-action { margin: 0 5px; }
+        .form-section { margin-bottom: 30px; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-active { background-color: #ffc107; color: #000; }
+        .status-completed { background-color: #198754; color: #fff; }
+        #appContent { display: none; }
+        #loginForm { max-width: 400px; margin: 50px auto; }
+        .logo { max-height: 60px; margin-bottom: 20px; }
+        .user-info { margin-left: 15px; font-size: 0.9rem; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div id="loginSection" class="text-center">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-lock"></i> Acesso Restrito - Seja Fibra
+            </div>
+            <div class="card-body">
+                <img src="https://sejafibra.net/wp-content/uploads/2023/06/logonovofibra.png" alt="Seja Fibra" class="logo">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="loginEmail" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="loginEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </form>
+                <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="appContent" class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="d-inline-block">Controle de Manutenções</h1>
+                <span class="user-info">
+                    <i class="fas fa-user"></i> <span id="currentUserEmail"></span>
+                </span>
+            </div>
+            <button id="logoutBtn" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+        </div>
+        
+        <div class="card form-section">
+            <div class="card-header">
+                <i class="fas fa-plus-circle"></i> Cadastrar Nova Manutenção
+            </div>
+            <div class="card-body">
+                <form id="maintenanceForm">
+                    <input type="hidden" id="maintenanceId">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">Cidade</label>
+                            <select class="form-select" id="city" required>
+                                <option value="">Selecione uma cidade</option>
+                                <option value="Ubatuba">Ubatuba</option>
+                                <option value="Caraguatatuba">Caraguatatuba</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="neighborhood" class="form-label">Bairro</label>
+                            <select class="form-select" id="neighborhood">
+                                <option value="">Selecione um bairro ou cidade inteira</option>
+                                <option value="TODA_CIDADE">Cidade Inteira</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="problemType" class="form-label">Tipo de Problema</label>
+                            <select class="form-select" id="problemType" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="TV">TV</option>
+                                <option value="Internet">Internet</option>
+                                <option value="Geral">Geral</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="responsible" class="form-label">Responsável</label>
+                            <input type="text" class="form-control" id="responsible" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="startDate" class="form-label">Data e Hora de Início</label>
+                            <input type="datetime-local" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endDate" class="form-label">Data e Hora de Término (opcional)</label>
+                            <input type="datetime-local" class="form-control" id="endDate">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-secondary me-md-2" id="cancelBtn" style="display: none;">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-list"></i> Últimas Manutenções Cadastradas
+                </div>
+                <a href="https://fabricioubatuba.github.io/descontos/" class="btn btn-sm btn-info" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Calcular Descontos
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Protocolo</th>
+                                <th>Cidade</th>
+                                <th>Área Afetada</th>
+                                <th>Tipo</th>
+                                <th>Responsável</th>
+                                <th>Início</th>
+                                <th>Término</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maintenanceTable">
+                            <tr>
+                                <td colspan="9" class="text-center">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC95aDwbm43uv7UPB7YDT5VjCe5USz2mZ8",
+            authDomain: "descontos-4ab4b.firebaseapp.com",
+            databaseURL: "https://descontos-4ab4b-default-rtdb.firebaseio.com",
+            projectId: "descontos-4ab4b",
+            storageBucket: "descontos-4ab4b.firebasestorage.app",
+            messagingSenderId: "907559767912",
+            appId: "1:907559767912:web:d9974a77e46a5ef08ed0dd"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        const neighborhoods = {
+            'Ubatuba': ['Acaraú', 'Barra da Lagoa', 'Barra-Seca', 'Caçandoca', 'Centro', 'Emaús', 'Enseada', 'Estufa 1', 'Estufa 2', 'Ipiranguinha', 'Itaguá', 'Itamambuca', 'Jardim Carolina', 'Lagoinha', 'Lázaro', 'Marafunda', 'Maranduba', 'Parque Dos Ministérios', 'Parque Guarani', 'Parque Vivamar', 'Pedra Verde', 'Pedreira', 'Perequê-Açú', 'Pereque-Mirim', 'Praia Do Pulso', 'Praia Dura', 'Praia Grande', 'Rio Escuro', 'Santa Rita', 'Sapé', 'Sertão Da Quina', 'Silop', 'Sumaré', 'Sumidouro', 'Taquaral', 'Taquaral (Angelim)', 'Taquaral (Vila Resende)', 'Tenório', 'Toninhas', 'Umuarama', 'Vale Do Sol', 'Vila Sumaré'],
+            'Caraguatatuba': ['Alamedas dos Pessegueiros', 'Alamedas das Amendoeiras', 'Alamedas das Cerejeiras', 'Alamedas Das Figueiras', 'Alamedas Dos Castanheiros', 'Araguais', 'Barranco Alto', 'Caputera', 'Casa Branca', 'Centro', 'Cidade Jardim', 'Cond Res Vilaggio Portofino', 'Cond. Beira Mar (Martim De Sá)', 'Cond. Gaivotas', 'Costa Nova', 'Costa Verde', 'Getuba', 'Golfinhos', 'Golfinhos', 'Ilhas Canárias', 'Jaraguazinho', 'Jardim Capricornio', 'Jardim Gaivotas', 'Jardim Primavera', 'Jardim Santa Rosa (Chocolate)', 'Jardim Terralão', 'Martim De Sá', 'Massaguaçu', 'Morro Do Algodão', 'Olaria', 'Osvaldo Cruz', 'Parque Imperial', 'Pereque', 'Poiares', 'Ponte Seca', 'Portal Fazendinha', 'Portal Patrimonio', 'Praia Da Mococa', 'Prainha', 'Rio Do Ouro', 'Santos Dumont', 'Sumaré', 'Tabatinga', 'Terralão', 'Tocantins', 'Travessão', 'Loteamento Morada Do Mar', 'Indaiá', 'Jardim California', 'Jardim Jaqueira', 'Tinga']
+        };
+
+        // Referências do DOM
+        const loginSection = document.getElementById('loginSection');
+        const appContent = document.getElementById('appContent');
+        const loginForm = document.getElementById('loginForm');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const currentUserEmail = document.getElementById('currentUserEmail');
+        
+        const citySelect = document.getElementById('city');
+        const neighborhoodSelect = document.getElementById('neighborhood');
+        const problemTypeSelect = document.getElementById('problemType');
+        const responsibleInput = document.getElementById('responsible');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const maintenanceForm = document.getElementById('maintenanceForm');
+        const maintenanceTable = document.getElementById('maintenanceTable');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const maintenanceIdInput = document.getElementById('maintenanceId');
+
+        // Estado da aplicação
+        let editingId = null;
+        let currentUser = null;
+        let allMaintenances = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAuth();
+            setupEventListeners();
+            setCurrentDateTime();
+        });
+
+        function setupEventListeners() {
+            citySelect.addEventListener('change', function() {
+                updateNeighborhoods();
+            });
+
+            maintenanceForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveMaintenance();
+            });
+
+            cancelBtn.addEventListener('click', function() {
+                cancelEdit();
+            });
+        }
+
+        function setupAuth() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    checkAuthorizedUser(user);
+                } else {
+                    showLogin();
+                }
+            });
+
+            loginForm.addEventListener('submit', e => {
+                e.preventDefault();
+                const email = loginEmail.value;
+                const password = loginPassword.value;
+                
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(userCredential => {
+                        checkAuthorizedUser(userCredential.user);
+                    })
+                    .catch(error => {
+                        loginError.textContent = error.message;
+                        loginError.style.display = 'block';
+                    });
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                auth.signOut();
+            });
+        }
+
+        function checkAuthorizedUser(user) {
+            const allowedEmails = [
+                'bioranss@gmail.com', 
+                'atendente@sejafibra.net', 
+                'supervisor@sejafibra.net'
+            ];
+            
+            if (allowedEmails.includes(user.email)) {
+                currentUser = user;
+                currentUserEmail.textContent = user.email;
+                showApp();
+                loadMaintenances();
+            } else {
+                alert('Acesso não autorizado. Você será desconectado.');
+                auth.signOut();
+            }
+        }
+
+        function showLogin() {
+            loginSection.style.display = 'block';
+            appContent.style.display = 'none';
+            loginForm.reset();
+            loginError.style.display = 'none';
+        }
+
+        function showApp() {
+            loginSection.style.display = 'none';
+            appContent.style.display = 'block';
+        }
+
+        function updateNeighborhoods() {
+            const city = citySelect.value;
+            neighborhoodSelect.innerHTML = '<option value="">Selecione um bairro ou cidade inteira</option>';
+            
+            if (city) {
+                neighborhoodSelect.disabled = false;
+                
+                // Adiciona opção "Cidade Inteira"
+                const cityOption = document.createElement('option');
+                cityOption.value = "TODA_CIDADE";
+                cityOption.textContent = city === "Ubatuba" ? "Ubatuba (Toda Cidade)" : "Caraguá (Toda Cidade)";
+                neighborhoodSelect.appendChild(cityOption);
+                
+                // Adiciona os bairros
+                neighborhoods[city].forEach(neighborhood => {
+                    const option = document.createElement('option');
+                    option.value = neighborhood;
+                    option.textContent = neighborhood;
+                    neighborhoodSelect.appendChild(option);
+                });
+            } else {
+                neighborhoodSelect.disabled = true;
+            }
+        }
+
+        function setCurrentDateTime() {
+            const now = new Date();
+            const timezoneOffset = now.getTimezoneOffset() * 60000;
+            const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
+            startDateInput.value = localISOTime;
+        }
+
+        function generateRandomProtocol() {
+            return Math.floor(1000000 + Math.random() * 9000000).toString();
+        }
+
+        function saveMaintenance() {
+            const city = citySelect.value;
+            const neighborhood = neighborhoodSelect.value;
+            const problemType = problemTypeSelect.value;
+            const responsible = responsibleInput.value.trim();
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            const id = maintenanceIdInput.value || database.ref().child('maintenances').push().key;
+            const protocol = generateRandomProtocol();
+
+            if (!city || !neighborhood || !problemType || !responsible || !startDate) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            // Determina o texto para exibição da área afetada
+const affectedArea = neighborhood === "TODA_CIDADE" ? 
+    (city === "Ubatuba" ? "Ubatuba (Toda Cidade)" : "Caraguá (Toda Cidade)") : 
+    neighborhood;
+
+// Modificação: Cria o valor formatado para o neighborhood
+const formattedNeighborhood = neighborhood === "TODA_CIDADE" ? 
+    (city === "Ubatuba" ? "Ubatuba (Toda Cidade)" : "Caraguá (Toda Cidade)") : 
+    neighborhood;
+
+const maintenanceData = {
+    city,
+    neighborhood: formattedNeighborhood, // Usa o valor formatado aqui
+    affectedArea,
+    problemType,
+    responsible,
+    startDate,
+    endDate,
+    protocol,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP,
+    updatedBy: currentUser.email,
+    isCityWide: neighborhood === "TODA_CIDADE"
+};
+
+            const updates = {};
+            updates['/maintenances/' + id] = maintenanceData;
+
+            database.ref().update(updates)
+                .then(() => {
+                    alert('Manutenção salva com sucesso!');
+                    resetForm();
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar:', error);
+                    alert('Erro ao salvar manutenção: ' + error.message);
+                });
+        }
+
+        function loadMaintenances() {
+            database.ref('maintenances').orderByChild('startDate').limitToLast(100).on('value', snapshot => {
+                maintenanceTable.innerHTML = '';
+                allMaintenances = [];
+                
+                if (!snapshot.exists()) {
+                    maintenanceTable.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma manutenção cadastrada</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach(childSnapshot => {
+                    const maintenance = {
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    };
+                    allMaintenances.push(maintenance);
+                });
+
+                // Ordena por data de abertura (mais recente primeiro)
+                allMaintenances.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+                allMaintenances.forEach(maintenance => {
+                    const row = document.createElement('tr');
+                    
+                    const startDate = formatDateTime(maintenance.startDate);
+                    const endDate = maintenance.endDate ? formatDateTime(maintenance.endDate) : '-';
+                    
+                    const status = maintenance.endDate ? 
+                        '<span class="status-badge status-completed">Concluído</span>' : 
+                        '<span class="status-badge status-active">Em Andamento</span>';
+
+                    row.innerHTML = `
+                        <td>${maintenance.protocol || 'N/A'}</td>
+                        <td>${maintenance.city}</td>
+                        <td>${maintenance.affectedArea || maintenance.neighborhood}</td>
+                        <td>${maintenance.problemType}</td>
+                        <td>${maintenance.responsible}</td>
+                        <td>${startDate}</td>
+                        <td>${endDate}</td>
+                        <td>${status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning btn-action edit-btn" data-id="${maintenance.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-action delete-btn" data-id="${maintenance.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    maintenanceTable.appendChild(row);
+                });
+
+                // Adiciona eventos aos botões
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        editMaintenance(this.getAttribute('data-id'));
+                    });
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        deleteMaintenance(this.getAttribute('data-id'));
+                    });
+                });
+            });
+        }
+
+        function editMaintenance(id) {
+            database.ref('maintenances/' + id).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        
+                        citySelect.value = data.city;
+                        updateNeighborhoods();
+                        
+                        setTimeout(() => {
+                            neighborhoodSelect.value = data.neighborhood;
+                            problemTypeSelect.value = data.problemType;
+                            responsibleInput.value = data.responsible;
+                            startDateInput.value = data.startDate;
+                            endDateInput.value = data.endDate || '';
+                            maintenanceIdInput.value = id;
+                            
+                            saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
+                            cancelBtn.style.display = 'block';
+                            
+                            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar manutenção:', error);
+                    alert('Erro ao carregar manutenção para edição');
+                });
+        }
+
+        function deleteMaintenance(id) {
+            if (confirm('Tem certeza que deseja excluir esta manutenção?')) {
+                database.ref('maintenances/' + id).remove()
+                    .then(() => {
+                        alert('Manutenção excluída com sucesso!');
+                    })
+                    .catch(error => {
+                        console.error('Erro ao excluir:', error);
+                        alert('Erro ao excluir manutenção');
+                    });
+            }
+        }
+
+        function cancelEdit() {
+            resetForm();
+        }
+
+        function resetForm() {
+            maintenanceForm.reset();
+            maintenanceIdInput.value = '';
+            neighborhoodSelect.disabled = true;
+            neighborhoodSelect.innerHTML = '<option value="">Selecione primeiro a cidade</option>';
+            setCurrentDateTime();
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+            cancelBtn.style.display = 'none';
+        }
+
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '-';
+            
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>
